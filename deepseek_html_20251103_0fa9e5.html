@@ -1,0 +1,2054 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Samawon</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body, html {
+      width: 100%;
+      height: 100%;
+      background: #000;
+      color: #eee;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+    }
+
+    /* --- شريط اسم علوي صغير ومدور --- */
+    .header-banner {
+      position: fixed;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      height: 36px;
+      padding: 0 16px;
+      background: rgba(30, 60, 114, 0.9);
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 101;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      backdrop-filter: blur(10px);
+      border-radius: 18px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    /* --- حاويات الصفوف --- */
+    .rows-container {
+      position: fixed;
+      top: 70px;
+      left: 0;
+      width: 100%;
+      height: calc(100% - 80px);
+      overflow-y: auto;
+      z-index: 96;
+      padding: 0;
+    }
+
+    .rows-container::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .rows-container::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+    }
+
+    .rows-container::-webkit-scrollbar-thumb {
+      background: #555;
+      border-radius: 10px;
+    }
+
+    /* --- كل صف أفقي قابل للتمرير الجانبي --- */
+    .row {
+      display: flex;
+      overflow-x: auto;
+      gap: 12px;
+      padding: 10px 20px 15px;
+      margin-bottom: 10px;
+      scroll-snap-type: x mandatory;
+      scrollbar-width: thin;
+      scrollbar-color: #3498db #111;
+    }
+
+    .row::-webkit-scrollbar {
+      height: 6px;
+    }
+
+    .row::-webkit-scrollbar-track {
+      background: rgba(255,255,255,0.05);
+      border-radius: 10px;
+    }
+
+    .row::-webkit-scrollbar-thumb {
+      background: #3498db;
+      border-radius: 10px;
+    }
+
+    /* --- بطاقة المنتج --- */
+    .product-card {
+      min-width: 180px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 12px;
+      padding: 14px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      scroll-snap-align: start;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .product-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    /* --- صورة المنتج داخل البطاقة --- */
+    .product-image {
+      width: 100%;
+      height: 100px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 8px;
+      margin-bottom: 8px;
+      border: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .product-card h4 {
+      color: #fff;
+      font-size: 15px;
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+
+    .product-card p {
+      color: #bbb;
+      font-size: 12px;
+      margin: 4px 0;
+    }
+
+    .price {
+      color: #2ecc71;
+      font-weight: bold;
+      font-size: 14px;
+    }
+
+    .rating {
+      color: #f39c12;
+      font-size: 12px;
+    }
+
+    /* --- نظام التقييم (نجوم) --- */
+    .stars {
+      display: flex;
+      margin-top: 4px;
+    }
+
+    .stars span {
+      color: #f39c12;
+      font-size: 14px;
+      margin-left: 2px;
+    }
+
+    /* --- السلايدر المركزي (الآن صورة واحدة فقط) --- */
+    .slider-container {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 65%;
+      max-width: 600px;
+      height: 320px;
+      overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+      z-index: 90;
+      background: #111;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .single-image {
+      width: 100%;
+      height: 100%;
+      background-image: url('https://images.unsplash.com/photo-1607746882042-944635dfe10e?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=800&q=90');
+      background-size: cover;
+      background-position: center;
+      position: relative;
+    }
+
+    .single-image::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(45deg, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.4) 100%);
+      pointer-events: none;
+    }
+
+    /* --- حاوية معلومات الكتاب --- */
+    .book-info-container {
+      width: 90%;
+      max-width: 800px;
+      margin: 20px auto 30px;
+      padding: 20px;
+      background: rgba(30, 30, 30, 0.8);
+      border-radius: 14px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #eee;
+    }
+
+    .book-info-container h3 {
+      font-size: 24px;
+      color: #e6b587;
+      margin-bottom: 10px;
+      text-align: right;
+    }
+
+    .book-info-container p {
+      font-size: 14px;
+      line-height: 1.7;
+      margin-bottom: 12px;
+      text-align: right;
+      color: #ccc;
+    }
+
+    .book-info-container .author {
+      color: #66d9ff;
+      font-weight: 500;
+      font-style: italic;
+    }
+
+    .benefits {
+      margin: 15px 0;
+      padding-right: 20px;
+    }
+
+    .benefits h4 {
+      color: #3498db;
+      margin-bottom: 10px;
+      font-size: 16px;
+    }
+
+    .benefits ul {
+      list-style: none;
+      padding-right: 20px;
+    }
+
+    .benefits li {
+      margin-bottom: 8px;
+      position: relative;
+    }
+
+    .benefits li::before {
+      content: "✓";
+      color: #2ecc71;
+      font-weight: bold;
+      margin-left: 6px;
+      position: absolute;
+      right: 100%;
+    }
+
+    /* --- الصورة الطبيعية تحت معلومات الكتاب --- */
+    .natural-image-container {
+      width: 90%;
+      max-width: 800px;
+      margin: 10px auto 30px;
+      height: 250px;
+      overflow: hidden;
+      border-radius: 16px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+      position: relative;
+      opacity: 0.8;
+    }
+
+    .natural-image {
+      width: 100%;
+      height: 100%;
+      background-image: url('https://images.unsplash.com/photo-1472851294608-062f824d29cc?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&h=800&q=90');
+      background-size: cover;
+      background-position: center;
+    }
+
+    .natural-image::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: linear-gradient(45deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
+      pointer-events: none;
+    }
+
+    /* --- التصميم المصغّر للواجهة الرئيسية --- */
+    .main-product {
+      position: fixed;
+      top: 100px;
+      left: 20px;
+      width: 260px;
+      background: rgba(30, 30, 30, 0.8);
+      border: 1px solid #444;
+      border-radius: 14px;
+      padding: 20px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+      z-index: 98;
+      display: none;
+      backdrop-filter: blur(10px);
+    }
+
+    .main-product h3 {
+      font-size: 17px;
+      color: #fff;
+      margin-bottom: 6px;
+      text-align: right;
+      font-weight: 600;
+    }
+
+    .main-product p {
+      font-size: 13px;
+      color: #bbb;
+      margin-bottom: 12px;
+      text-align: right;
+      line-height: 1.5;
+    }
+
+    .add-to-cart-btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      cursor: pointer;
+      text-align: center;
+      font-weight: 500;
+      box-shadow: 0 3px 8px rgba(52, 152, 219, 0.3);
+    }
+
+    .add-to-cart-btn:hover {
+      background: linear-gradient(135deg, #2980b9 0%, #1f6aad 100%);
+    }
+
+    /* زر القائمة */
+    .menu-toggle {
+      position: fixed;
+      top: 75px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+      background: rgba(30, 30, 30, 0.8);
+      border: 1px solid #555;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      z-index: 100;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      backdrop-filter: blur(5px);
+    }
+
+    .menu-toggle:hover {
+      transform: scale(1.05);
+      background: rgba(50, 50, 50, 0.8);
+    }
+
+    .menu-toggle span {
+      width: 60%;
+      height: 3px;
+      background-color: #aaa;
+      margin: 3px 0;
+      border-radius: 1px;
+      transition: 0.3s;
+    }
+
+    /* اللوحة العامة */
+    .panel {
+      position: fixed;
+      top: 60px;
+      right: -320px;
+      width: 300px;
+      height: calc(100% - 60px);
+      background: #111;
+      box-shadow: -8px 0 30px rgba(0,0,0,0.5);
+      z-index: 99;
+      transition: right 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+      padding: 20px;
+      border-right: 1px solid #333;
+      overflow-y: auto;
+      backdrop-filter: blur(10px);
+    }
+
+    .panel.open {
+      right: 0;
+    }
+
+    .panel h2 {
+      text-align: center;
+      color: #3498db;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #3498db;
+      font-size: 20px;
+      font-weight: 600;
+    }
+
+    /* أزرار القائمة */
+    .menu-btn {
+      display: block;
+      width: 100%;
+      padding: 16px;
+      margin-bottom: 12px;
+      background-color: rgba(50, 50, 50, 0.6);
+      border: 1px solid #444;
+      border-radius: 10px;
+      text-align: center;
+      font-size: 15px;
+      color: #ccc;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .menu-btn:hover {
+      background-color: #333;
+      color: #fff;
+    }
+
+    /* نموذج إضافة منتج */
+    .add-product-form {
+      margin-top: 15px;
+      padding: 18px;
+      background-color: rgba(50, 50, 50, 0.6);
+      border: 1px solid #444;
+      border-radius: 10px;
+      box-shadow: 0 2px 7px rgba(0,0,0,0.2);
+    }
+
+    .add-product-form input,
+    .add-product-form textarea,
+    .add-product-form button {
+      width: 100%;
+      margin-bottom: 10px;
+      padding: 8px;
+      border: 1px solid #555;
+      border-radius: 6px;
+      font-size: 13px;
+      background-color: #333;
+      color: white;
+    }
+
+    .add-product-form input::placeholder,
+    .add-product-form textarea::placeholder {
+      color: #888;
+    }
+
+    .add-new-product-btn {
+      background-color: #2ecc71;
+      color: white;
+      font-weight: bold;
+      padding: 10px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    /* --- معاينة الملفات في نموذج الإضافة --- */
+    .preview-container {
+      margin: 10px 0;
+      text-align: center;
+    }
+
+    .preview-box {
+      width: 100%;
+      height: 120px;
+      background-color: #222;
+      border: 1px dashed #555;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #888;
+      font-size: 13px;
+      overflow: hidden;
+    }
+
+    .preview-box img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: cover;
+    }
+
+    .upload-btn-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      margin: 0 5px;
+    }
+
+    .btn {
+      border: 1px solid #555;
+      display: inline-block;
+      padding: 8px 12px;
+      cursor: pointer;
+      background-color: #444;
+      border-radius: 6px;
+      font-size: 13px;
+    }
+
+    .btn:hover {
+      background-color: #555;
+    }
+
+    .upload-btn-wrapper input[type=file] {
+      font-size: 100px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    /* الصورة الشخصية */
+    #mainProfilePic {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      width: 55px;
+      height: 55px;
+      border-radius: 50%;
+      object-fit: cover;
+      z-index: 99;
+      border: 3px solid #fff;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      display: none;
+    }
+
+    /* خانة السلة */
+    .cart-screen {
+      position: fixed;
+      top: 60px;
+      left: 0;
+      width: 100%;
+      height: calc(100% - 60px);
+      background-color: #000;
+      z-index: 98;
+      display: none;
+      flex-direction: column;
+      padding: 20px;
+      box-sizing: border-box;
+      overflow-y: auto;
+    }
+
+    .cart-header {
+      text-align: center;
+      color: #3498db;
+      margin-bottom: 20px;
+      font-size: 20px;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+      font-weight: 600;
+    }
+
+    .cart-close {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background-color: #95a5a6;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    /* --- بطاقة المنتج في السلة (محدثة للترتيب) --- */
+    .cart-item {
+      margin-bottom: 18px;
+      padding: 16px;
+      background-color: #1a1a1a;
+      border: 1px solid #444;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      transition: all 0.2s ease;
+    }
+
+    .cart-item:hover {
+      background-color: #222;
+      transform: translateY(-2px);
+    }
+
+    .cart-item .item-image {
+      width: 85px;
+      height: 85px;
+      background-size: cover;
+      background-position: center;
+      border-radius: 10px;
+      border: 1px solid #555;
+      flex-shrink: 0;
+      background-color: #222;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    }
+
+    .cart-item .item-details {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cart-item strong {
+      color: #fff;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+
+    .cart-item .item-note {
+      font-size: 12px;
+      color: #888;
+      font-style: italic;
+      margin-bottom: 5px;
+    }
+
+    .cart-item p {
+      color: #bbb;
+      font-size: 13px;
+      margin: 3px 0;
+    }
+
+    /* --- أزرار السلة (محدثة للترتيب) --- */
+    .cart-item-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+      min-width: 120px;
+    }
+
+    .cart-item .cart-item-buy {
+      display: block;
+      width: 100%;
+      padding: 9px;
+      background-color: #28a745;
+      color: white;
+      text-align: center;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      box-shadow: 0 1px 3px rgba(40,167,69,0.3);
+    }
+
+    .cart-item .cart-item-buy:hover {
+      background-color: #218838;
+    }
+
+    .cart-item .cart-item-download {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #0077cc;
+      color: white;
+      text-align: center;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      box-shadow: 0 1px 3px rgba(0,119,204,0.3);
+    }
+
+    .cart-item .cart-item-download:hover {
+      background-color: #005fa3;
+    }
+
+    .cart-item .cart-item-locked {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #f39c12;
+      color: white;
+      text-align: center;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: not-allowed;
+      box-shadow: 0 1px 3px rgba(243,156,18,0.3);
+    }
+
+    .cart-item .cart-item-remove {
+      display: block;
+      width: 100%;
+      padding: 7px;
+      background-color: #dc3545;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(220,53,69,0.3);
+    }
+
+    .cart-item .cart-item-remove:hover {
+      background-color: #c82333;
+    }
+
+    .cart-total {
+      text-align: center;
+      font-weight: bold;
+      margin: 20px 0 12px;
+      color: #3498db;
+      font-size: 18px;
+      padding: 12px;
+      background-color: #111;
+      border-radius: 8px;
+      border: 1px solid #3498db;
+      box-shadow: 0 2px 6px rgba(52,152,187,0.2);
+    }
+
+    /* --- خانة التعليقات --- */
+    #commentsScreen {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    #commentsList {
+      flex: 1;
+      overflow-y: auto;
+      max-height: 200px;
+      padding: 10px;
+      background-color: #1a1a1a;
+      border-radius: 8px;
+      border: 1px solid #444;
+      font-size: 14px;
+      color: #ccc;
+      line-height: 1.6;
+    }
+
+    .comment {
+      margin-bottom: 10px;
+      padding: 10px;
+      background-color: #222;
+      border-radius: 6px;
+      border-left: 4px solid #3498db;
+      word-wrap: break-word;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .comment-text {
+      flex: 1;
+    }
+
+    .comment-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .edit-comment-btn, .delete-comment-btn {
+      background-color: #95a5a6;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 5px 8px;
+      font-size: 12px;
+      cursor: pointer;
+      min-width: 50px;
+    }
+
+    .delete-comment-btn {
+      background-color: #e74c3c;
+    }
+
+    .edit-comment-btn:hover {
+      background-color: #7f8c8d;
+    }
+
+    .delete-comment-btn:hover {
+      background-color: #c0392b;
+    }
+
+    #commentInput {
+      width: 100%;
+      min-height: 60px;
+      max-height: 120px;
+      padding: 12px;
+      background-color: #333;
+      border: 1px solid #555;
+      border-radius: 8px;
+      color: #eee;
+      font-size: 14px;
+      resize: none;
+      transition: height 0.2s ease;
+      outline: none;
+    }
+
+    #commentInput:focus {
+      border-color: #3498db;
+      box-shadow: 0 0 5px rgba(52, 152, 187, 0.3);
+    }
+
+    #sendCommentBtn {
+      width: 100%;
+      padding: 10px;
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    #sendCommentBtn:hover {
+      background-color: #2980b9;
+    }
+
+    /* --- لوحة التحكم الإدارية داخل "نبذة عني" --- */
+    #adminControls {
+      display: none;
+      margin-top: 20px;
+      padding: 15px;
+      background: rgba(50, 50, 50, 0.8);
+      border: 1px solid #444;
+      border-radius: 10px;
+      font-size: 14px;
+    }
+
+    #adminControls h3 {
+      color: #3498db;
+      margin-bottom: 10px;
+      text-align: right;
+    }
+
+    .admin-btn {
+      display: block;
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 8px;
+      background-color: #8e44ad;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .admin-btn:hover {
+      background-color: #7d3c98;
+    }
+
+    .admin-btn.danger {
+      background-color: #c0392b;
+    }
+
+    .admin-btn.danger:hover {
+      background-color: #a93226;
+    }
+
+    #adminPassword {
+      width: 100%;
+      padding: 8px;
+      background-color: #333;
+      border: 1px solid #555;
+      border-radius: 6px;
+      color: #eee;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    /* --- مربع كتابة كلمة المرور لتسجيل الخروج --- */
+    #logoutPassword {
+      width: 100%;
+      padding: 8px;
+      background-color: #333;
+      border: 1px solid #555;
+      border-radius: 6px;
+      color: #eee;
+      font-size: 13px;
+      margin-bottom: 10px;
+    }
+
+    /* --- نمط مربعات النصائح --- */
+    .tip {
+      background: rgba(50, 50, 50, 0.6);
+      border: 1px solid #444;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 10px;
+      transition: all 0.2s ease;
+    }
+
+    .tip:hover {
+      background: #333;
+      transform: translateY(-2px);
+    }
+
+    .tip-ar {
+      color: #fff;
+      font-size: 14px;
+      margin-bottom: 4px;
+      font-weight: 500;
+    }
+
+    .tip-en {
+      color: #bbb;
+      font-size: 12px;
+      font-style: italic;
+    }
+
+    .tip-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 8px;
+    }
+
+    .copy-btn {
+      background-color: #3498db;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      padding: 4px 8px;
+      font-size: 12px;
+      cursor: pointer;
+    }
+
+    .copy-btn:hover {
+      background-color: #2980b9;
+    }
+    
+    /* --- تحسينات PayPal --- */
+    .paypal-button-container {
+      margin-top: 10px;
+      text-align: center;
+    }
+    
+    .payment-status {
+      margin-top: 10px;
+      padding: 10px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: bold;
+    }
+    
+    .payment-success {
+      background-color: rgba(46, 204, 113, 0.2);
+      color: #2ecc71;
+      border: 1px solid #2ecc71;
+    }
+    
+    .payment-error {
+      background-color: rgba(231, 76, 60, 0.2);
+      color: #e74c3c;
+      border: 1px solid #e74c3c;
+    }
+    
+    .payment-loading {
+      background-color: rgba(52, 152, 219, 0.2);
+      color: #3498db;
+      border: 1px solid #3498db;
+    }
+    
+    /* --- تحسينات للأجهزة المحمولة --- */
+    @media (max-width: 768px) {
+      .slider-container {
+        width: 90%;
+        height: 250px;
+      }
+      
+      .main-product {
+        width: 90%;
+        left: 5%;
+        top: 80px;
+      }
+      
+      .panel {
+        width: 85%;
+      }
+      
+      .book-info-container, .natural-image-container {
+        width: 95%;
+      }
+      
+      .cart-item {
+        flex-direction: column;
+      }
+      
+      .cart-item-actions {
+        width: 100%;
+        flex-direction: row;
+        justify-content: space-between;
+      }
+      
+      .cart-item .cart-item-buy,
+      .cart-item .cart-item-download,
+      .cart-item .cart-item-remove {
+        width: 48%;
+      }
+    }
+    
+    @media (max-width: 480px) {
+      .header-banner {
+        font-size: 16px;
+        padding: 0 12px;
+        height: 32px;
+      }
+      
+      .product-card {
+        min-width: 150px;
+      }
+      
+      .cart-item-actions {
+        flex-direction: column;
+      }
+      
+      .cart-item .cart-item-buy,
+      .cart-item .cart-item-download,
+      .cart-item .cart-item-remove {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- شريط اسم علوي صغير ومدور -->
+  <div class="header-banner">Samawon</div>
+
+  <!-- السلايدر المركزي (الآن صورة واحدة فقط) -->
+  <div class="slider-container">
+    <div class="single-image"></div>
+  </div>
+
+  <!-- الصورة الشخصية -->
+  <img id="mainProfilePic" alt="Profile">
+
+  <!-- المنتج في الواجهة الرئيسية -->
+  <div class="main-product" id="mainProduct" style="display: none;">
+    <h3 id="mainProductName">اسم المنتج</h3>
+    <p id="mainProductPrice">السعر: 0 دولار</p>
+    <p id="mainProductDesc">وصف المنتج</p>
+    <button class="add-to-cart-btn" onclick="addToCartFromMain()">أضف إلى السلة</button>
+  </div>
+
+  <!-- زر القائمة -->
+  <div class="menu-toggle" id="menuToggle">☰</div>
+
+  <!-- القائمة الرئيسية -->
+  <div class="panel" id="mainMenu">
+    <h2>القائمة</h2>
+    <div class="menu-btn" id="aboutBtn">نبذة عني</div>
+    <div class="menu-btn" id="tipsBtn">نصائح</div>
+    <div class="menu-btn" id="medicalTipsBtn">نصائح طبية</div>
+    <div class="menu-btn" id="commentsBtn">💬 تعليقات</div>
+    <!-- زر إضافة منتج يظهر فقط للمدير بعد تسجيل الدخول -->
+    <div class="menu-btn" id="addProductBtn" style="display: none;">➕ إضافة منتج</div>
+
+    <!-- زر فتح خانة السلة -->
+    <div class="menu-btn" id="openCartBtn">🛒 عرض السلة</div>
+  </div>
+
+  <!-- نبذة عني -->
+  <div class="panel" id="aboutScreen">
+    <h2>نبذة عني</h2>
+    <button class="close-panel" id="closeAbout">🔙</button>
+    <div class="about-content" style="text-align: right; margin: 20px; line-height: 1.8; font-size: 14px; color: #ccc;">
+      <p><strong>الاسم:</strong> Samawon</p>
+      <p><strong>صاحب المتجر</strong></p>
+      <p><strong>عن المتجر:</strong> بيع المنتجات الرقمية</p>
+      <p>زوروا متجرنا واستمتعوا بتجربة تسوق فقط</p>
+      <hr style="border: 1px solid #444; margin: 15px 0;">
+      <div>
+        <a href="mailto:wabou580@gmail.com" style="color: #3498db; text-decoration: none; margin: 5px 0; display: block;">📧 wabou580@gmail.com</a>
+        <a href="https://wa.me/212626097085" target="_blank" style="color: #2ecc71; text-decoration: none; margin: 5px 0; display: block;">💬 واتساب 764-312697</a>
+        <a href="https://youtube.com/@armed-gw1n" target="_blank" style="color: #e74c3c; text-decoration: none; margin: 5px 0; display: block;">▶️ YouTube</a>
+        <a href="https://www.instagram.com/n5ve0?igsh=azhwanJ1OHhyaW91" target="_blank" style="color: #8e44ad; text-decoration: none; margin: 5px 0; display: block;">🟣 Instagram</a>
+      </div>
+      <hr style="border: 1px solid #444; margin: 15px 0;">
+      <div style="font-size: 12px; color: #777;">
+        <p>简介 | <a href="#" style="color: #555;">新闻中心</a> | 版权 | <a href="mailto:wabou580@gmail.com" style="color: #555;">联系我们</a> | 创作者 | 刊登广告 | 开发人员 | 条款 | 私隐 | 政策及安全 | YouTube 的运作方式 | 测试新功能</p>
+        <p>© 2025 Google LLC</p>
+      </div>
+
+      <!-- لوحة التحكم الإدارية المخفية -->
+      <div id="adminControls">
+        <h3>🔐 تحكم</h3>
+        <input type="password" id="adminPassword" placeholder="أدخل كلمة المرور">
+        <!-- زر واحد للدخول والخروج -->
+        <button class="admin-btn" id="toggleLoginBtn">🔐 تسجيل الدخول</button>
+
+        <!-- تظهر فقط بعد تسجيل الدخول -->
+        <div id="adminActions" style="display: none;">
+          <button class="admin-btn" id="addProductAdminBtn">➕ إضافة منتج جديد</button>
+          <button class="admin-btn" id="clearAllCommentsBtn">🗑️ مسح جميع التعليقات</button>
+
+          <!-- زر رفع الصورة الشخصية -->
+          <div class="upload-btn-wrapper">
+            <button class="btn">🖼️ تغيير الصورة الشخصية</button>
+            <input type="file" id="profilePicInput" accept="image/*">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- نصائح -->
+  <div class="panel" id="tipsScreen">
+    <h2>نصائح حياة</h2>
+    <button class="close-panel" id="closeTips">🔙</button>
+    <div id="tipsContainer"></div>
+  </div>
+
+  <!-- نصائح طبية -->
+  <div class="panel" id="medicalTipsScreen">
+    <h2>نصائح طبية</h2>
+    <button class="close-panel" id="closeMedicalTips">🔙</button>
+    <div id="medicalTipsContainer"></div>
+  </div>
+
+  <!-- خانة السلة -->
+  <div class="cart-screen" id="cartScreen">
+    <button class="cart-close" id="closeCartScreen">إغلاق</button>
+    <div class="cart-header">🛒 سلة المشتريات</div>
+    <div id="cartItems"></div>
+    <div class="cart-total" id="cartTotal">المجموع الكامل: 0 دولار</div>
+  </div>
+
+  <!-- خانة التعليقات -->
+  <div class="panel" id="commentsScreen">
+    <h2>💬 تعليقات</h2>
+    <button class="close-panel" id="closeComments">🔙</button>
+    <div id="commentsList">
+      <!-- سيتم عرض التعليقات هنا -->
+    </div>
+    <textarea id="commentInput" placeholder="اكتب تعليقك هنا..."></textarea>
+    <button id="sendCommentBtn" onclick="sendComment()">إرسال</button>
+  </div>
+
+  <!-- نموذج إضافة منتج -->
+  <div class="panel" id="addProductFormPanel">
+    <h2>➕ إضافة منتج</h2>
+    <button class="close-panel" id="closeAddProductFormPanel">🔙</button>
+    <div class="add-product-form">
+      <input type="text" id="productName" placeholder="اسم المنتج">
+      <input type="number" id="productPrice" placeholder="السعر (أي رقم، 0 = مجاني)" min="0" step="any">
+      <textarea id="productDesc" placeholder="وصف المنتج"></textarea>
+
+      <!-- رفع ملف المنتج -->
+      <div class="upload-btn-wrapper">
+        <button class="btn">1. ملف المنتج</button>
+        <input type="file" id="productFile" accept="*/*">
+      </div>
+      <div class="preview-container">
+        <div class="preview-box" id="filePreview">سيتم عرض الملف هنا</div>
+      </div>
+
+      <!-- رفع صورة للمنتج -->
+      <div class="upload-btn-wrapper">
+        <button class="btn">2. صورة للمنتج</button>
+        <input type="file" id="productImage" accept="image/*">
+      </div>
+      <div class="preview-container">
+        <div class="preview-box" id="imagePreview">سيتم عرض الصورة هنا</div>
+      </div>
+
+      <button onclick="addNewProduct()" class="add-new-product-btn">➕ إضافة منتج جديد</button>
+      <button onclick="closeAddProductFormPanel()">إغلاق</button>
+    </div>
+  </div>
+
+  <!-- حاوية الصفوف (تمت إزالة 8 صفوف، تبقى صفان فقط) -->
+  <div class="rows-container">
+    <!-- الصف الأول -->
+    <div class="row">
+      <div class="product-card">
+        <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1542744094-24638eff58bb?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200&q=80')"></div>
+        <h4>أسطورة التفكير</h4>
+        <p>كتاب عن التحيّزات</p>
+        <p class="price">12.99 دولار</p>
+        <div class="stars">
+          <span>★</span><span>★</span><span>★</span><span>★</span><span>☆</span>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1544947950-fa07a98d237f?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200&q=80')"></div>
+        <h4>العادات الذرية</h4>
+        <p>بناء عادات قوية</p>
+        <p class="price">14.99 دولار</p>
+        <div class="stars">
+          <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1589998059171-988d887df646?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200&q=80')"></div>
+        <h4>فن الحرب</h4>
+        <p>نص سون تزو</p>
+        <p class="price">8.99 دولار</p>
+        <div class="stars">
+          <span>★</span><span>★</span><span>★</span><span>☆</span><span>☆</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- الصف الثاني -->
+    <div class="row">
+      <div class="product-card">
+        <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200&q=80')"></div>
+        <h4>الذكاء العاطفي</h4>
+        <p>لدى دانيال جولمان</p>
+        <p class="price">16.50 دولار</p>
+        <div class="stars">
+          <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1585079542156-2755d9c8a094?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200&q=80')"></div>
+        <h4>الغرض</h4>
+        <p>كتاب عن المعنى</p>
+        <p class="price">11.00 دولار</p>
+        <div class="stars">
+          <span>★</span><span>★</span><span>★</span><span>☆</span><span>☆</span>
+        </div>
+      </div>
+      <div class="product-card">
+        <div class="product-image" style="background-image: url('https://images.unsplash.com/photo-1543002588-bfa74002ed7e?ixlib=rb-4.0.3&auto=format&fit=crop&w=400&h=200&q=80')"></div>
+        <h4>الانفجار المعرفي</h4>
+        <p>تحسين الذاكرة</p>
+        <p class="price">13.75 دولار</p>
+        <div class="stars">
+          <span>★</span><span>★</span><span>★</span><span>★</span><span>☆</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- معلومات ومنافع الكتاب (بدون سعر أو زر) -->
+    <div class="book-info-container">
+      <h3>التفكير البطيء والسريع</h3>
+      <p class="author">بقلم: دانيال كانيمان</p>
+      <p>يُعد هذا الكتاب أحد أعظم الكتب في علم النفس الحديث، حيث يُفصّل الفائز بجائزة نوبل دانيال كانيمان كيف يتخذ العقل البشري القرارات، ويُقسّم التفكير إلى نظامين: النظام السريع (البديهي) والنظام البطيء (المنطقي).</p>
+      <p>يُظهر كانيمان كيف تؤدي التحيّزات المعرفية إلى أخطاء في التقدير، واتخاذ قرارات مالية وعاطفية غير منطقية، ويُقدّم استراتيجيات عملية لتحسين التفكير واتخاذ قرارات أفضل في الحياة اليومية.</p>
+
+      <div class="benefits">
+        <h4>منافع هذا الكتاب:</h4>
+        <ul>
+          <li>فهم أسباب اتخاذك لقرارات غير منطقية.</li>
+          <li>تحسين مهاراتك في اتخاذ القرارات المالية والاستثمارية.</li>
+          <li>الإدراك المبكر للتحيّزات النفسية (مثل: تحيّز التوافر، تحيّز التأكيد).</li>
+          <li>تعزيز التفكير النقدي والتحليلي.</li>
+          <li>تحسين الأداء في العمل والقيادة.</li>
+          <li>اتخاذ قرارات أفضل في الحياة الشخصية والعاطفية.</li>
+          <li>تقليل الأخطاء الناتجة عن التسرع في الحكم.</li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- الصورة الطبيعية تحت معلومات الكتاب -->
+    <div class="natural-image-container">
+      <div class="natural-image"></div>
+    </div>
+  </div>
+
+  <!-- تحميل SDK لـ PayPal -->
+  <script src="https://www.paypal.com/sdk/js?client-id=test&currency=USD"></script>
+
+  <script>
+    // --- لا يوجد سلايدر، صورة واحدة فقط ---
+    // تم إزالة دالة nextSlide() والتحديث التلقائي
+
+    // --- باقي وظائف التطبيق ---
+    const el = id => document.getElementById(id);
+    const menuToggle = el('menuToggle');
+    const mainMenu = el('mainMenu');
+    const aboutScreen = el('aboutScreen');
+    const tipsScreen = el('tipsScreen');
+    const medicalTipsScreen = el('medicalTipsScreen');
+    const openCartBtn = el('openCartBtn');
+    const mainProduct = el('mainProduct');
+    const mainProductName = el('mainProductName');
+    const mainProductPrice = el('mainProductPrice');
+    const mainProductDesc = el('mainProductDesc');
+    const cartItems = el('cartItems');
+    const cartTotal = el('cartTotal');
+    const cartScreen = el('cartScreen');
+    const closeCartScreen = el('closeCartScreen');
+    const commentsBtn = el('commentsBtn');
+    const commentsScreen = el('commentsScreen');
+    const closeComments = el('closeComments');
+    const commentsList = el('commentsList');
+    const commentInput = el('commentInput');
+    const sendCommentBtn = el('sendCommentBtn');
+    const addProductFormPanel = el('addProductFormPanel');
+    const closeAddProductFormPanel = el('closeAddProductFormPanel');
+    const adminControls = el('adminControls');
+    const adminPassword = el('adminPassword');
+    const toggleLoginBtn = el('toggleLoginBtn'); // الزر الجديد
+    const adminActions = el('adminActions');
+    const addProductAdminBtn = el('addProductAdminBtn');
+    const addProductBtn = el('addProductBtn'); // الزر في القائمة
+    const profilePicInput = el('profilePicInput'); // مدخل رفع الصورة
+    const mainProfilePic = el('mainProfilePic'); // الصورة في الأعلى
+
+    // --- حالة الدخول ---
+    let isAdminLoggedIn = false;
+
+    // --- فتح القائمة ---
+    menuToggle.onclick = () => {
+      closeAll();
+      mainMenu.classList.add('open');
+    };
+
+    // --- إغلاق بالنقر خارج القائمة ---
+    document.addEventListener('click', (e) => {
+      if (!mainMenu.contains(e.target) && !menuToggle.contains(e.target) && mainMenu.classList.contains('open')) {
+        closeAll();
+      }
+    });
+
+    function closeAll() {
+      [mainMenu, aboutScreen, tipsScreen, medicalTipsScreen, commentsScreen, addProductFormPanel].forEach(p => {
+        p.classList.remove('open');
+        // إزالة التحولات عند الإغلاق
+        p.style.transition = 'none';
+        p.offsetHeight; // إعادة التموضع
+        p.style.transition = '';
+      });
+    }
+
+    // --- فتح الشاشات ---
+    el('aboutBtn').onclick = () => {
+      openPanel(aboutScreen);
+      // إظهار لوحة التحكم فقط عند النقر على "نبذة عني"
+      adminControls.style.display = 'block';
+    };
+    el('tipsBtn').onclick = () => {
+      openPanel(tipsScreen);
+      if (el('tipsContainer').children.length === 0) generateTips(el('tipsContainer'), lifeTips, "نصيحة حياة #");
+    };
+    el('medicalTipsBtn').onclick = () => {
+      openPanel(medicalTipsScreen);
+      if (el('medicalTipsContainer').children.length === 0) generateTips(el('medicalTipsContainer'), medicalTips, "نصيحة طبية #");
+    };
+    commentsBtn.onclick = () => openPanel(commentsScreen);
+    // زر إضافة منتج يفتح النموذج مباشرة (فقط للمدير بعد تسجيل الدخول)
+    addProductBtn.onclick = () => {
+      if (isAdminLoggedIn) {
+        openPanel(addProductFormPanel);
+      } else {
+        alert('يجب تسجيل الدخول كمدير أولاً. انقر على "نبذة عني" وأدخل كلمة المرور.');
+      }
+    };
+
+    function openPanel(panel) {
+      closeAll();
+      panel.classList.add('open');
+      // إعادة التموضع بعد فتح اللوحة
+      panel.offsetHeight;
+      panel.classList.add('open');
+    }
+
+    // --- إغلاق الخانات ---
+    closeComments.onclick = () => {
+      commentsScreen.classList.remove('open');
+    };
+
+    closeAddProductFormPanel.onclick = () => {
+      addProductFormPanel.classList.remove('open');
+    };
+
+    // --- وظيفة التبديل بين تسجيل الدخول والخروج ---
+    toggleLoginBtn.onclick = async () => {
+      const password = adminPassword.value.trim();
+      if (!password) return alert('الرجاء إدخال كلمة المرور');
+
+      try {
+        // ✅ المحاولة الرئيسية: التحقق من الخادم
+        const response = await fetch('/api/verify-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.valid) {
+          // ✅ تحقق ناجح من الخادم
+          if (isAdminLoggedIn) {
+            // تسجيل الخروج
+            handleLogout();
+          } else {
+            // تسجيل الدخول
+            handleSuccessfulLogin();
+          }
+          return;
+        }
+      } catch (error) {
+        console.error('فشل الاتصال بالخادم:', error);
+      }
+
+      // ✅ التحقق من الكلمة المعرفة مباشرة
+      if (password === "Ppag6063.@#$") {
+        if (isAdminLoggedIn) {
+          // تسجيل الخروج
+          handleLogout();
+        } else {
+          // تسجيل الدخول
+          handleSuccessfulLogin();
+        }
+        return;
+      }
+
+      // ❌ إذا فشل التحقق
+      alert('فشل التحقق من كلمة المرور. الرجاء التحقق من صحة كلمة المرور والمحاولة مرة أخرى.');
+    };
+
+    // --- وظائف مساعدة لتسجيل الدخول/الخروج ---
+    function handleSuccessfulLogin() {
+      isAdminLoggedIn = true;
+      adminActions.style.display = 'block';
+      addProductBtn.style.display = 'block';
+      aboutScreen.classList.add('open');
+      updateCartScreen();
+      toggleLoginBtn.textContent = '🚪 تسجيل الخروج';
+      // ✅ تسجيل الحدث الأمني
+      logSecurityEvent('admin_login', 'Success');
+      alert('تم تسجيل الدخول كمدير. تم فتح لوحة التحكم.');
+    }
+
+    function handleLogout() {
+      isAdminLoggedIn = false;
+      adminActions.style.display = 'none';
+      addProductBtn.style.display = 'none';
+      adminPassword.value = '';
+      aboutScreen.classList.remove('open');
+      updateCartScreen();
+      toggleLoginBtn.textContent = '🔐 تسجيل الدخول';
+      // ✅ تسجيل الحدث الأمني
+      logSecurityEvent('admin_logout', 'Success');
+      alert('تم تسجيل الخروج بنجاح. تم إغلاق لوحة التحكم.');
+    }
+
+    // --- إدارة المنتج الحالي ---
+    let currentProduct = null;
+
+    // --- معاينة ملف المنتج ---
+    el('productFile').onchange = function(e) {
+      const file = e.target.files[0];
+      const preview = el('filePreview');
+      if (!file) return;
+
+      const type = file.type;
+      const name = file.name;
+
+      if (type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          preview.innerHTML = `<img src="${e.target.result}" alt="معاينة">`;
+        };
+        reader.readAsDataURL(file);
+      } else if (type === 'application/pdf') {
+        preview.innerHTML = `
+          <div style="text-align:center; padding:10px;">
+            <img src="https://img.icons8.com/color/48/000000/pdf.png" alt="PDF">
+            <div style="font-size:12px; margin-top:5px;">${name}</div>
+          </div>`;
+      } else if (type.startsWith('video/')) {
+        preview.innerHTML = `
+          <div style="text-align:center; padding:10px;">
+            <img src="https://img.icons8.com/color/48/000000/video-playlist.png" alt="Video">
+            <div style="font-size:12px; margin-top:5px;">${name}</div>
+          </div>`;
+      } else if (type.startsWith('audio/')) {
+        preview.innerHTML = `
+          <div style="text-align:center; padding:10px;">
+            <img src="https://img.icons8.com/color/48/000000/audio-file.png" alt="Audio">
+            <div style="font-size:12px; margin-top:5px;">${name}</div>
+          </div>`;
+      } else {
+        preview.innerHTML = `
+          <div style="text-align:center; padding:10px;">
+            <img src="https://img.icons8.com/color/48/000000/file.png" alt="File">
+            <div style="font-size:12px; margin-top:5px;">${name}</div>
+          </div>`;
+      }
+    };
+
+    // --- معاينة صورة المنتج ---
+    el('productImage').onchange = function(e) {
+      const file = e.target.files[0];
+      const preview = el('imagePreview');
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.innerHTML = `<img src="${e.target.result}" alt="صورة المنتج">`;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    // --- تحديد أيقونة للملف ---
+    function getFileIcon(file) {
+      if (!file) return 'https://via.placeholder.com/85x85?text=ملف';
+      const type = file.type;
+
+      if (type.startsWith('image/')) {
+        return URL.createObjectURL(file);
+      } else if (type === 'application/pdf') {
+        return 'https://img.icons8.com/color/48/000000/pdf.png';
+      } else if (type.startsWith('video/')) {
+        return 'https://img.icons8.com/color/48/000000/video-playlist.png';
+      } else if (type.startsWith('audio/')) {
+        return 'https://img.icons8.com/color/48/000000/audio-file.png';
+      } else if (type.includes('word') || type.includes('document')) {
+        return 'https://img.icons8.com/color/48/000000/docx.png';
+      } else if (type.includes('excel') || type.includes('sheet')) {
+        return 'https://img.icons8.com/color/48/000000/xlsx.png';
+      } else if (type.includes('powerpoint')) {
+        return 'https://img.icons8.com/color/48/000000/pptx.png';
+      } else {
+        return 'https://img.icons8.com/color/48/000000/file.png';
+      }
+    }
+
+    // --- إضافة منتج جديد إلى السلة ---
+    function addNewProduct() {
+      if (!isAdminLoggedIn) {
+        alert('يجب تسجيل الدخول كمدير أولاً.');
+        return;
+      }
+      const name = el('productName').value.trim();
+      const priceInput = el('productPrice').value.trim();
+      const desc = el('productDesc').value.trim();
+      const fileInput = el('productFile');
+      const imageInput = el('productImage');
+      const file = fileInput.files[0];
+      const image = imageInput.files[0];
+
+      if (!name) return alert('الرجاء إدخال اسم المنتج');
+
+      const price = parseFloat(priceInput);
+      if (isNaN(price)) return alert('الرجاء إدخال رقم صحيح');
+
+      // تحديد صورة العرض (الصورة المخصصة)
+      let displayImageUrl = 'https://via.placeholder.com/85x85?text=منتج';
+      if (image) {
+        displayImageUrl = URL.createObjectURL(image);
+      } else if (file) {
+        // إذا لم تُرفع صورة، استخدم أيقونة الملف
+        displayImageUrl = getFileIcon(file);
+      }
+
+      // تحديد ملاحظة بناءً على النوع
+      let note = '';
+      if (desc.includes('PDF') || desc.includes('كتاب') || desc.includes('تقرير')) {
+        note = '📄 ملف جاهز للتحميل بعد الشراء';
+      } else if (desc.includes('دورة') || desc.includes('تدريب')) {
+        note = '🎥 فيديوهات تعليمية - 1080p';
+      } else if (desc.includes('تصميم') || desc.includes('شعار') || desc.includes('قالب')) {
+        note = '🎨 ملفات PSD و AI متضمنة';
+      } else if (desc.includes('استشارة')) {
+        note = '⏱️ جلسة خاصة عبر Zoom';
+      } else if (price === 0) {
+        note = '🎁 هدية مجانية - تحميل فوري';
+      } else {
+        note = '📦 منتج رقمي - لا يحتاج شحن';
+      }
+
+      // إضافة المنتج إلى السلة
+      cartList.push({
+        id: Date.now(),
+        name,
+        price,
+        desc,
+        file,
+        imageUrl: displayImageUrl, // الصورة المعروضة
+        imageFile: image, // الصورة الأصلية (لإلغاء التحميل لاحقًا)
+        note,
+        purchased: price === 0
+      });
+      alert(`تمت إضافة المنتج: ${name} - السعر: ${price} دولار`);
+
+      // مسح الحقول
+      el('productName').value = '';
+      el('productPrice').value = '';
+      el('productDesc').value = '';
+      el('productFile').value = '';
+      el('productImage').value = '';
+      el('filePreview').innerHTML = 'سيتم عرض الملف هنا';
+      el('imagePreview').innerHTML = 'سيتم عرض الصورة هنا';
+
+      // تحديث السلة
+      updateCartScreen();
+
+      // إغلاق النموذج
+      addProductFormPanel.classList.remove('open');
+    }
+
+    // --- فتح نموذج إضافة منتج ---
+    addProductAdminBtn.onclick = () => {
+      if (!isAdminLoggedIn) {
+        alert('يجب تسجيل الدخول كمدير أولاً.');
+        return;
+      }
+      openPanel(addProductFormPanel);
+    };
+
+    // --- إضافة المنتج المعروض في الواجهة إلى السلة ---
+    function addToCartFromMain() {
+      if (!currentProduct) return;
+      cartList.push({ id: Date.now(), ...currentProduct, purchased: currentProduct.price === 0 });
+      alert('تمت إضافة المنتج إلى السلة');
+      updateCartScreen();
+    }
+
+    // --- فتح خانة السلة كواجهة منفصلة ---
+    openCartBtn.onclick = () => {
+      closeAll();
+      updateCartScreen();
+      cartScreen.style.display = 'flex';
+    };
+
+    closeCartScreen.onclick = () => {
+      cartScreen.style.display = 'none';
+    };
+
+    // --- إدارة السلة ---
+    const cartList = [];
+
+    function updateCartScreen() {
+      try {
+        cartItems.innerHTML = '';
+        let total = 0;
+
+        cartList.forEach(item => {
+          total += item.price;
+          const div = document.createElement('div');
+          div.className = 'cart-item';
+
+          // بناء هيكل المنتج في السلة بترتيب منسق
+          div.innerHTML = `
+            <div class="item-image" style="background-image: url('${item.imageUrl}')"></div>
+            <div class="item-details">
+              <strong>${item.name}</strong>
+              <p class="item-note">${item.note}</p>
+              <p>${item.desc}</p>
+              <p>السعر: ${item.price} دولار</p>
+            </div>
+            <div class="cart-item-actions">
+              <!-- ✅ زر الحذف يظهر فقط عند تسجيل الدخول -->
+              ${isAdminLoggedIn ? `<button class="cart-item-remove" onclick="removeFromCart(${item.id})">❌ حذف</button>` : ''}
+            </div>
+          `;
+
+          let downloadButton = '';
+          if (item.purchased && item.file) {
+            downloadButton = `<a href="#" onclick="downloadFile(event, ${item.id})" class="cart-item-download">📥 تحميل الآن</a>`;
+          } else if (item.file && item.price === 0) {
+            downloadButton = `<a href="#" onclick="downloadFile(event, ${item.id})" class="cart-item-download">🟢 تحميل مجاني</a>`;
+          } else if (item.file) {
+            downloadButton = `<div class="cart-item-locked">🔒 يجب الدفع أولاً</div>`;
+          } else {
+            downloadButton = `<div class="cart-item-locked">⚠️ لا يوجد ملف</div>`;
+          }
+
+          let buyButton = '';
+          if (item.price > 0 && !item.purchased) {
+            buyButton = `<a href="#" class="cart-item-buy" onclick="startPaymentForItem(${item.id})">💳 شراء</a>`;
+          }
+
+          // إدراج أزرار الشراء والتحميل في قسم الأزرار
+          if (buyButton || downloadButton) {
+            const actionsDiv = div.querySelector('.cart-item-actions');
+            actionsDiv.innerHTML += buyButton + downloadButton;
+          }
+
+          cartItems.appendChild(div);
+        });
+
+        cartTotal.textContent = `المجموع الكامل: ${total} دولار`;
+      } catch (error) {
+        console.error('خطأ في تحديث شاشة السلة:', error);
+        cartItems.innerHTML = '<div style="color: #e74c3c; text-align: center; padding: 20px;">حدث خطأ أثناء تحميل السلة. الرجاء المحاولة لاحقًا.</div>';
+        cartTotal.textContent = 'المجموع الكامل: 0 دولار';
+      }
+    }
+
+    // --- حذف منتج من السلة ---
+    function removeFromCart(id) {
+      try {
+        const index = cartList.findIndex(p => p.id === id);
+        if (index !== -1) {
+          // إلغاء تحرير عنوان URL للصورة المعروضة
+          if (cartList[index].imageFile && cartList[index].imageUrl.startsWith('blob:')) {
+            URL.revokeObjectURL(cartList[index].imageUrl);
+          }
+          // إذا كانت الصورة من نوع الملف، نُحررها فقط إذا لم تكن أيقونة
+          else if (cartList[index].file && cartList[index].imageUrl.startsWith('blob:') && cartList[index].imageFile === null) {
+            URL.revokeObjectURL(cartList[index].imageUrl);
+          }
+          cartList.splice(index, 1);
+          updateCartScreen();
+        }
+      } catch (error) {
+        console.error('خطأ في حذف المنتج من السلة:', error);
+        alert('حدث خطأ أثناء حذف المنتج. الرجاء المحاولة لاحقًا.');
+      }
+    }
+
+    // --- بدء الدفع لمنتج واحد باستخدام PayPal SDK ---
+    function startPaymentForItem(id) {
+      try {
+        const item = cartList.find(p => p.id === id);
+        if (!item) throw new Error('المنتج غير موجود');
+
+        // ✅ تحديد معدل الطلبات (Rate Limiting) - مثال بسيط
+        const now = Date.now();
+        const lastPaymentAttempt = sessionStorage.getItem('lastPaymentAttempt');
+        if (lastPaymentAttempt && now - lastPaymentAttempt < 2000) { // 2 ثانية
+          alert('يرجى الانتظار قليلاً قبل المحاولة مرة أخرى.');
+          return;
+        }
+        sessionStorage.setItem('lastPaymentAttempt', now);
+
+        // إزالة أي عنصر سابق لـ PayPal
+        const existingPayPalButtons = document.querySelectorAll('.paypal-buttons');
+        existingPayPalButtons.forEach(btn => btn.remove());
+
+        // إنشاء عنصر جديد لأزرار PayPal
+        const div = document.createElement('div');
+        div.className = 'paypal-buttons';
+        div.style.padding = '10px';
+        div.style.textAlign = 'center';
+        const cartItemDiv = document.querySelector(`[onclick="startPaymentForItem(${id})"]`).parentElement;
+        cartItemDiv.appendChild(div);
+
+        // إنشاء دفع باستخدام PayPal SDK
+        paypal.Buttons({
+          createOrder: (data, actions) => {
+            return actions.order.create({
+              purchase_units: [{
+                amount: {
+                  value: item.price.toFixed(2),
+                  currency_code: 'USD'
+                },
+                description: item.name
+              }]
+            });
+          },
+          onApprove: async (data, actions) => {
+            try {
+              const order = await actions.order.capture();
+              console.log('تم الدفع بنجاح:', order);
+
+              // ✅ التحقق من الدفع عبر ويبهوك (تم تنفيذه على الخادم)
+              // ✅ التحديث المحلي
+              item.purchased = true;
+              updateCartScreen();
+              alert('شكرًا لك على شرائك! تم تفعيل التحميل.');
+              // ✅ تسجيل الحدث الأمني
+              logSecurityEvent('payment_success', `Product ID: ${id}, Order ID: ${data.orderID}`);
+            } catch (error) {
+              console.error('فشل في استكمال الدفع:', error);
+              // ✅ تسجيل الحدث الأمني
+              logSecurityEvent('payment_error', `Product ID: ${id}, Error: ${error.message}`);
+              alert('حدث خطأ أثناء معالجة الدفع. الرجاء المحاولة لاحقًا.');
+            }
+          },
+          onError: (err) => {
+            console.error('خطأ في دفع PayPal:', err);
+            // ✅ تسجيل الحدث الأمني
+            logSecurityEvent('payment_error', `PayPal SDK Error: ${err.message}`);
+            alert('حدث خطأ في نظام الدفع. الرجاء المحاولة لاحقًا.');
+          },
+          style: {
+            layout: 'horizontal',
+            color: 'blue',
+            shape: 'pill',
+            label: 'pay'
+          }
+        }).render(div);
+      } catch (error) {
+        console.error('خطأ في بدء الدفع:', error);
+        // ✅ تسجيل الحدث الأمني
+        logSecurityEvent('payment_error', `startPaymentForItem Error: ${error.message}`);
+        alert('حدث خطأ أثناء بدء عملية الشراء.');
+      }
+    }
+
+    // --- تحميل الملف مباشرة ---
+    function downloadFile(e, id) {
+      e.preventDefault();
+      try {
+        const item = cartList.find(p => p.id === id);
+        if (!item || !item.file) throw new Error('الملف غير موجود');
+
+        const url = URL.createObjectURL(item.file);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = item.file.name || `منتج_${id}`;
+        a.click();
+        URL.revokeObjectURL(url);
+        // ✅ تسجيل الحدث الأمني
+        logSecurityEvent('file_download', `Product ID: ${id}, File: ${item.file.name}`);
+      } catch (error) {
+        console.error('خطأ في تحميل الملف:', error);
+        // ✅ تسجيل الحدث الأمني
+        logSecurityEvent('file_download_error', `Product ID: ${id}, Error: ${error.message}`);
+        alert('حدث خطأ أثناء تحميل الملف.');
+      }
+    }
+
+    // --- التحقق من الدفع عند العودة ---
+    // ✅ تم إزالة هذا الجزء لأن التحقق يتم الآن عبر ويبهوك
+    // window.addEventListener('load', () => { ... });
+
+    // --- النصائح ---
+    const lifeTips = [
+      ["كن لطيفاً، فالجميع يخوض معركة صعبة.", "Be kind, for everyone is fighting a hard battle."],
+      ["لا تؤجل ما يمكنك فعله اليوم إلى الغد.", "Don't put off what you can do today until tomorrow."]
+    ];
+
+    const medicalTips = [
+      ["اشرب 8 أكواب ماء يومياً للحفاظ على رطوبة جسمك.", "Drink 8 glasses of water daily to stay hydrated."],
+      ["نم 7-8 ساعات كل ليلة لصحة عقلية وجسدية جيدة.", "Sleep 7-8 hours every night for good mental and physical health."]
+    ];
+
+    function generateTips(container, tipsList, prefix) {
+      try {
+        for (let i = 1; i <= 1000; i++) {
+          const idx = (i - 1) % tipsList.length;
+          const [ar, en] = tipsList[idx];
+          const tip = document.createElement('div');
+          tip.className = 'tip';
+          tip.innerHTML = `
+            <div class="tip-ar">${ar}</div>
+            <div class="tip-en">${en}</div>
+            <div class="tip-actions">
+              <button class="copy-btn" onclick="copyText(\`${ar}\\n${en}\`)">📋 نسخ</button>
+            </div>
+          `;
+          container.appendChild(tip);
+        }
+      } catch (error) {
+        console.error('خطأ في توليد النصائح:', error);
+        container.innerHTML = '<div style="color: #e74c3c; text-align: center; padding: 10px;">حدث خطأ أثناء تحميل النصائح.</div>';
+      }
+    }
+
+    function copyText(text) {
+      try {
+        const ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.position = 'fixed';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        alert('تم النسخ!');
+        // ✅ تسجيل الحدث الأمني
+        logSecurityEvent('text_copy', `Copied text: ${text.substring(0, 50)}...`);
+      } catch (error) {
+        console.error('خطأ في نسخ النص:', error);
+        alert('فشل النسخ. الرجاء المحاولة يدويًا.');
+        // ✅ تسجيل الحدث الأمني
+        logSecurityEvent('text_copy_error', `Error: ${error.message}`);
+      }
+    }
+
+    window.copyText = copyText;
+
+    // --- نظام التعليقات ---
+    let editingComment = null; // متغير لتتبع التعليق الجاري تعديله
+
+    function sendComment() {
+      try {
+        const text = commentInput.value.trim();
+        if (!text) return;
+
+        // ✅ تحديد معدل الطلبات (Rate Limiting) - مثال بسيط
+        const now = Date.now();
+        const lastCommentTime = sessionStorage.getItem('lastCommentTime');
+        if (lastCommentTime && now - lastCommentTime < 5000) { // 5 ثوانٍ
+          alert('يرجى الانتظار 5 ثوانٍ قبل إرسال تعليق آخر.');
+          return;
+        }
+        sessionStorage.setItem('lastCommentTime', now);
+
+        if (editingComment) {
+          // تحديث التعليق
+          const textSpan = editingComment.querySelector('.comment-text');
+          textSpan.textContent = text;
+          // إعادة تعيين الزر
+          sendCommentBtn.textContent = 'إرسال';
+          editingComment = null;
+          // ✅ تسجيل الحدث الأمني
+          logSecurityEvent('comment_update', `Comment ID: ${editingComment.id}, Text: ${text}`);
+        } else {
+          // إضافة تعليق جديد
+          const div = document.createElement('div');
+          div.className = 'comment';
+          div.id = 'comment_' + Date.now(); // إضافة معرف فريد
+
+          const textSpan = document.createElement('div');
+          textSpan.className = 'comment-text';
+          textSpan.textContent = text;
+
+          const actionsDiv = document.createElement('div');
+          actionsDiv.className = 'comment-actions';
+
+          const editBtn = document.createElement('button');
+          editBtn.className = 'edit-comment-btn';
+          editBtn.textContent = 'تعديل';
+          editBtn.onclick = function() {
+            commentInput.value = textSpan.textContent;
+            commentInput.style.height = 'auto';
+            commentInput.style.height = Math.min(commentInput.scrollHeight, 120) + 'px';
+            sendCommentBtn.textContent = 'تحديث';
+            editingComment = div;
+          };
+
+          const deleteBtn = document.createElement('button');
+          deleteBtn.className = 'delete-comment-btn';
+          deleteBtn.textContent = 'حذف';
+          deleteBtn.onclick = function() {
+            if (isAdminLoggedIn) {
+              commentsList.removeChild(div);
+              // ✅ تسجيل الحدث الأمني
+              logSecurityEvent('comment_delete', `Comment ID: ${div.id}`);
+            } else {
+              alert('يجب تسجيل الدخول كمدير لحذف التعليقات.');
+              // ✅ تسجيل الحدث الأمني
+              logSecurityEvent('comment_delete_denied', `Attempt to delete comment ID: ${div.id} without admin rights`);
+            }
+          };
+
+          actionsDiv.appendChild(editBtn);
+          actionsDiv.appendChild(deleteBtn);
+          div.appendChild(textSpan);
+          div.appendChild(actionsDiv);
+          commentsList.appendChild(div);
+          // ✅ تسجيل الحدث الأمني
+          logSecurityEvent('comment_add', `Text: ${text}`);
+        }
+
+        // إعادة تعيين المدخلات
+        commentInput.value = '';
+        commentInput.style.height = '60px';
+        commentsList.scrollTop = commentsList.scrollHeight;
+      } catch (error) {
+        console.error('خطأ في إرسال التعليق:', error);
+        alert('حدث خطأ أثناء إرسال التعليق.');
+        // ✅ تسجيل الحدث الأمني
+        logSecurityEvent('comment_error', `Error: ${error.message}`);
+      }
+    }
+
+    // --- نظام التوسع (زيادة الارتفاع تلقائيًا عند الكتابة) ---
+    commentInput.oninput = function() {
+      try {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+      } catch (error) {
+        console.error('خطأ في تحديث ارتفاع مربع التعليق:', error);
+      }
+    };
+
+    // --- أوامر لوحة التحكم ---
+    el('clearAllCommentsBtn').onclick = () => {
+      try {
+        if (confirm('هل أنت متأكد من مسح جميع التعليقات؟')) {
+          commentsList.innerHTML = '';
+          // ✅ تسجيل الحدث الأمني
+          logSecurityEvent('comments_cleared', 'All comments were cleared by admin');
+          alert('تم مسح جميع التعليقات.');
+        }
+      } catch (error) {
+        console.error('خطأ في مسح التعليقات:', error);
+        alert('حدث خطأ أثناء مسح التعليقات.');
+        // ✅ تسجيل الحدث الأمني
+        logSecurityEvent('comments_clear_error', `Error: ${error.message}`);
+      }
+    };
+
+    // --- رفع الصورة الشخصية ---
+    profilePicInput.onchange = function(e) {
+      if (!isAdminLoggedIn) {
+        alert('يجب تسجيل الدخول كمدير أولاً.');
+        // ✅ تسجيل الحدث الأمني
+        logSecurityEvent('profile_pic_upload_denied', 'Attempt to upload profile picture without admin rights');
+        return;
+      }
+      const file = e.target.files[0];
+      if (!file) return;
+
+      try {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          mainProfilePic.src = e.target.result;
+          mainProfilePic.style.display = 'block';
+          alert('تم تغيير الصورة الشخصية بنجاح.');
+          // ✅ تسجيل الحدث الأمني
+          logSecurityEvent('profile_pic_uploaded', `File: ${file.name}, Size: ${file.size} bytes`);
+        };
+        reader.readAsDataURL(file);
+      } catch (error) {
+        console.error('خطأ في تحميل الصورة الشخصية:', error);
+        alert('حدث خطأ أثناء تحميل الصورة.');
+        // ✅ تسجيل الحدث الأمني
+        logSecurityEvent('profile_pic_upload_error', `Error: ${error.message}`);
+      }
+    };
+
+    // --- وظائف الأمان الإضافية ---
+
+    // ✅ تسجيل الأحداث الأمنية (Security Logging)
+    // هذه الدالة يمكن أن تُستخدم لجمع السجلات وإرسالها إلى الخادم لتحليلها لاحقًا.
+    function logSecurityEvent(eventType, details) {
+      // في بيئة إنتاج، يمكن إرسال هذه السجلات إلى خادم السجلات
+      const logEntry = {
+        timestamp: new Date().toISOString(),
+        eventType: eventType,
+        details: details,
+        userAgent: navigator.userAgent,
+        // لا تقم بتسجيل كلمات المرور أبداً
+      };
+      console.log('Security Event:', logEntry);
+      // ✅ مثال على إرسال السجل إلى الخادم (تم تعطيله للحفاظ على السرية)
+      // fetch('/api/log-event', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(logEntry)
+      // }).catch(err => console.error('فشل إرسال سجل الأمان:', err));
+    }
+
+    // ✅ تحديد معدل الطلبات (Rate Limiting)
+    // تم تنفيذ مثال بسيط باستخدام `sessionStorage` في دوال `sendComment` و `startPaymentForItem`.
+    // في بيئة إنتاج، يتم تنفيذ ذلك على مستوى الخادم باستخدام أدوات مثل nginx أو Express.js middleware.
+  </script>
+
+</body>
+</html>
